@@ -61,3 +61,6 @@ Será preciso que se empleen callbacks para la selección del tipo de hash, así
 - No se puntuará ningún ejercicio (aunque funcione correctamente) que no aplique los conceptos vistos sobre el paradigma de programación funcional.
 - El script de Python debe contener al menos cinco llamadas a cada una de las funciones para comprobar su correcto funcionamiento.
 - Además del código de las funciones en un archivo `.py`, será necesaria una explicación sobre el funcionamiento de cada función desarrollada en un PDF.
+
+## Dependencias:
+- pycryptodome
