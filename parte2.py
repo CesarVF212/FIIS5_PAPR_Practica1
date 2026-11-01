@@ -13,11 +13,27 @@ ERRORES = {
     503: "Servicio no disponible",
 }
 
-def hash_sha1(contrasena):
+def hash_sha1(contrasena: str) -> str:
+    """Calcula el hash SHA-1 de una contraseña.
+
+    Args:
+        contrasena (str): Contraseña en texto plano.
+
+    Returns:
+        str: Hash SHA-1 en formato hexadecimal y en mayúsculas.
+    """
     return hashlib.sha1(contrasena.encode("utf-8")).hexdigest().upper()
 
 
-def hash_ntlm(contrasena):
+def hash_ntlm(contrasena: str) -> str:
+    """Calcula el hash NTLM de una contraseña.
+
+    Args:
+        contrasena (str): Contraseña en texto plano.
+
+    Returns:
+        str: Hash NTLM en formato hexadecimal y en mayúsculas.
+    """
     return MD4.new(contrasena.encode("utf-16le")).hexdigest().upper()
 
 
@@ -27,38 +43,80 @@ MODOS_HASH = {
 }
 
 
-def mensaje_error(codigo):
+def mensaje_error(codigo: int) -> str:
+    """Devuelve un mensaje descriptivo según el código de error HTTP recibido.
+
+    Args:
+        codigo (int): Código de estado HTTP.
+
+    Returns:
+        str: Mensaje de error correspondiente.
+    """
     return ERRORES.get(codigo, f"Error inesperado (codigo {codigo})")
 
 
-def hacer_peticion(url, callback_ok, callback_error):
+def hacer_peticion(url: str, callback_ok, callback_error):
+    """Realiza una petición HTTP GET manejando errores de conexión y códigos de estado.
+
+    Args:
+        url (str): URL de destino.
+        callback_ok (callable): Función a ejecutar si la respuesta es exitosa (código 200).
+        callback_error (callable): Función a ejecutar si ocurre un error o fallo de conexión.
+
+    Returns:
+        El resultado de invocar el callback correspondiente.
+    """
     try:
         respuesta = requests.get(url, headers=CABECERAS, timeout=10)
 
-    # CASO: Fallo de conexión.
     except requests.exceptions.RequestException:
         return callback_error("No se pudo conectar con el servidor")
 
-    # CASO: Acierto.
     if respuesta.status_code == 200:
         return callback_ok(respuesta)
 
-    # Caso: Error.
     return callback_error(mensaje_error(respuesta.status_code))
 
 
-def obtener_cuenta(texto, sufijo):
+def obtener_cuenta(texto: str, sufijo: str) -> int:
+    """Busca un sufijo de hash en la respuesta y extrae el número de veces filtrada.
+
+    Args:
+        texto (str): Respuesta en texto plano de la API.
+        sufijo (str): Sufijo del hash que se está buscando.
+
+    Returns:
+        int: Número de veces que aparece la contraseña en filtraciones, o 0 si no se encuentra.
+    """
     coincidencias = list(filter(lambda linea: linea.split(":")[0] == sufijo, texto.splitlines()))
     return int(coincidencias[0].split(":")[1]) if coincidencias else 0
 
 
-def mensaje_contrasena(cuenta):
+def mensaje_contrasena(cuenta: int) -> str:
+    """Genera el mensaje correspondiente según el número de filtraciones de una contraseña.
+
+    Args:
+        cuenta (int): Número de veces que ha aparecido la contraseña.
+
+    Returns:
+        str: Mensaje informativo sobre la filtración.
+    """
     if cuenta == 0:
         return "La contrasena no aparece en ninguna filtracion"
     return f"La contrasena ha aparecido {cuenta} veces en filtraciones"
 
 
-def comprobar_contrasena(contrasena, funcion_hash, parametro):
+def comprobar_contrasena(contrasena: str, funcion_hash, parametro: str) -> str:
+    """Comprueba si una contraseña ha sido filtrada utilizando su hash.
+
+    Args:
+        contrasena (str): Contraseña a comprobar.
+        funcion_hash (callable): Función para calcular el hash (SHA-1 o NTLM).
+        parametro (str): Parámetro adicional para la URL.
+
+    Returns:
+        str: Resultado de la comprobación en forma de mensaje.
+    """
     hash_completo = funcion_hash(contrasena)
     prefijo = hash_completo[:5]
     sufijo = hash_completo[5:]
@@ -70,8 +128,15 @@ def comprobar_contrasena(contrasena, funcion_hash, parametro):
     )
 
 
-def mensaje_brechas(brechas):
+def mensaje_brechas(brechas: list[dict]) -> str:
+    """Formatea la lista de brechas de seguridad obtenidas para un dominio.
 
+    Args:
+        brechas (list of dict): Lista de diccionarios con la información de las filtraciones.
+
+    Returns:
+        str: Texto formateado con las brechas encontradas o mensaje de que no hay.
+    """
     if not brechas:
         return "No hay filtraciones asociadas a este dominio"
 
@@ -79,8 +144,15 @@ def mensaje_brechas(brechas):
     return "\n".join(lineas)
 
 
-def comprobar_dominio(dominio):
+def comprobar_dominio(dominio: str) -> str:
+    """Comprueba las brechas de seguridad asociadas a un dominio específico.
 
+    Args:
+        dominio (str): Nombre del dominio a consultar.
+
+    Returns:
+        str: Mensaje con las brechas encontradas o error.
+    """
     return hacer_peticion(
         f"{URL_BREACHES}?Domain={dominio}",
         lambda respuesta: mensaje_brechas(respuesta.json()),
@@ -88,8 +160,8 @@ def comprobar_dominio(dominio):
     )
 
 
-def modo_contrasenas():
-
+def modo_contrasenas() -> None:
+    """Ejecuta el modo interactivo para comprobar contraseñas."""
     opcion = input("Formato del hash (1: Windows NTLM, 2: estandar SHA1): ")
 
     if opcion not in MODOS_HASH:
@@ -102,8 +174,8 @@ def modo_contrasenas():
     print(comprobar_contrasena(contrasena, funcion_hash, parametro))
 
 
-def modo_dominios():
-
+def modo_dominios() -> None:
+    """Ejecuta el modo interactivo para comprobar dominios."""
     dominio = input("Dominio: ")
     print(comprobar_dominio(dominio))
 
@@ -114,8 +186,8 @@ MODOS = {
 }
 
 
-def main():
-
+def main() -> None:
+    """Punto de entrada principal para la ejecución interactiva del programa."""
     opcion = input("Modo (1: contrasenas, 2: dominios): ")
 
     if opcion not in MODOS:
@@ -125,8 +197,8 @@ def main():
     MODOS[opcion]()
 
 
-def pruebas():
-
+def pruebas() -> None:
+    """Ejecuta una batería de pruebas para verificar el funcionamiento de los módulos."""
     print("hash_sha1")
     print(hash_sha1("password"))
     print(hash_sha1("123456"))

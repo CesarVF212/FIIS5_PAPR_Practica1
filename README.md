@@ -64,3 +64,4 @@ Será preciso que se empleen callbacks para la selección del tipo de hash, así
 
 ## Dependencias:
 - pycryptodome
+- pdoc (Para documentación)

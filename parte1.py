@@ -1,33 +1,108 @@
 from functools import reduce
 
 def es_palindromo(texto):
-    # Limpiamos, quitando las mayúsculas y los espacios.
+    
+    """
+    Determina si un número es palíndromo comprobando si sus caracteres al derecho y la inversa coinciden.
+    No es necesario trabajar el texto antes. Se encarga de limpiarlo (eliminar mayúsculas y espacios). 
+
+    Args:
+        texto (string): Texto a evaluar.
+
+    Returns:
+        boolean: True si es palíndromo, False si no lo es.
+    
+    """
     limpio = "".join(filter(str.isalnum, texto.lower()))
 
-    # Vemos si da los mismos caracteres a nivel individual al recorrerlo del derecho y del revés.
     return limpio == limpio[::-1]
 
 
 def palindromos(lista):
+    """
+        Determina si una lista de palindromos lo son apoyandose en la función de palíndromos.
+    
+        Args:
+            texto (list of str): Listas de textos a evaluar.
+    
+        Returns:
+            list of bool: True si son palíndromos, False si no lo son. Para cada uno de ellos.
+    """
     return list(map(es_palindromo, lista))
 
 
-def cuadrados_sumados(n):
+def cuadrados_sumados(n: int) -> int:
+    """Calcula la suma de los cuadrados de los números enteros del 1 al n.
+
+    Esta función genera una secuencia numérica desde el 1 hasta `n`, 
+    eleva cada número al cuadrado utilizando una función lambda
+    aplicada mediante `map`, y acumula el resultado total 
+    con `sum`.
+
+    Args:
+        n (int): El número entero máximo hasta el cual se calcularán 
+        y sumarán los cuadrados.
+
+    Returns:
+        int: La suma total de los cuadrados de todos los números 
+        en el rango de 1 a n.
+    """
     return sum(map(lambda x: x ** 2, range(1, n + 1)))
 
 
-def factorial(n):
-    # Llamamos con un reduce (acumulador) a todos los valores inferiores al número hasta 1. 
-    # 5! = 5 * 4 * 3 * 2 * 1
+def factorial(n: int) -> int:
+    """Calcula el factorial de un número entero no negativo n.
+
+    Esta función genera una secuencia de números desde el 1 hasta `n` 
+    usando `range()`, y luego utiliza `reduce()` junto con `lambda` 
+    para multiplicar acumulativamente todos los elementos de la secuencia, 
+    comenzando con un valor inicial de 1.
+
+    Args:
+        n (int): El número entero del cual se desea calcular el factorial.
+
+    Returns:
+        int: El resultado del factorial de n (n!).
+    """
     return reduce(lambda a, b: a * b, range(1, n + 1), 1)
 
 
-def promedio(estudiante):
+def promedio(estudiante: dict) -> float:
+    """Calcula el promedio aritmético de las calificaciones de un estudiante.
+
+    Esta función extrae la lista de notas asociada a la clave "calificaciones" 
+    dentro del diccionario del estudiante, suma todos los valores utilizando 
+    la función `sum()`, y divide ese total entre la cantidad de elementos 
+    obtenida con `len()` para obtener la media.
+
+    Args:
+        estudiante (dict): Diccionario que contiene la información del estudiante, 
+        el cual debe incluir la clave "calificaciones" con una lista de números 
+        (enteros o flotantes).
+
+    Returns:
+        float: El promedio de las calificaciones del estudiante.
+    """
     notas = estudiante["calificaciones"]
     return sum(notas) / len(notas)
 
 
-def estudiantes_aprobados(estudiantes):
+def estudiantes_aprobados(estudiantes: list[dict]) -> list[dict]:
+    """Filtra una lista de estudiantes y devuelve aquellos que han aprobado.
+
+    Esta función utiliza la función `filter()` en combinación con una función 
+    lambda para evaluar a cada estudiante de la lista utilizando 
+    la función auxiliar `promedio()`. Selecciona únicamente a aquellos cuyo 
+    promedio es mayor o igual a 6, y acumula los resultados en una lista.
+
+    Args:
+        estudiantes (list of dict): Lista de diccionarios, donde cada diccionario 
+        representa los datos de un estudiante (incluyendo la clave "calificaciones").
+
+    Returns:
+        list of dict: Una nueva lista que contiene únicamente los diccionarios 
+        de los estudiantes cuyo promedio de calificaciones es de 6 o superior.
+    """
     return list(filter(lambda e: promedio(e) >= 6, estudiantes))
 
 
